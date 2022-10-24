@@ -7,6 +7,19 @@ import (
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
+type about struct {
+	app.Compo
+}
+
+func (a *about) Render() app.UI {
+	var text string = "whoa doggies"
+
+	return app.Div().Body(
+		app.H2().Text(text),
+		app.A().Href("/").Text(text),
+	)
+}
+
 // hello is a component that displays a simple "Hello World!". A component is a
 // customizable, independent, and reusable UI element. It is created by
 // embedding app.Compo into a struct.
@@ -29,6 +42,7 @@ func main() {
 	// This is done by calling the Route() function,  which tells go-app what
 	// component to display for a given path, on both client and server-side.
 	app.Route("/", &hello{})
+	app.Route("/about", &about{})
 
 	// Once the routes set up, the next thing to do is to either launch the app
 	// or the server that serves the app.
@@ -54,8 +68,12 @@ func main() {
 		Description: "An Hello World! example",
 	})
 
+	http.Handle("/about", &app.Handler{
+		Name:        "About",
+		Description: "Test page",
+	})
+
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal(err)
 	}
 }
-

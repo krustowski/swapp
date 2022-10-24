@@ -86,11 +86,11 @@ fmt:
 
 build: 
 	@echo -e "\n${YELLOW} Building the project (docker-compose build)... ${RESET}\n"
-	@docker-compose build --no-cache || docker compose build --no-cache
+	@docker compose build --no-cache
 
 run:	build
 	@echo -e "\n${YELLOW} Starting project (docker-compose up)... ${RESET}\n"
-	@docker-compose up --force-recreate --detach || docker compose up --force-recreate --detach
+	@docker compose up --force-recreate --detach
 
 logs:
 	@echo -e "\n${YELLOW} Fetching container's logs (CTRL-C to exit)... ${RESET}\n"
@@ -98,5 +98,5 @@ logs:
 
 stop:  
 	@echo -e "\n${YELLOW} Stopping and purging project (docker-compose down)... ${RESET}\n"
-	@docker-compose down || docker compose down
+	@docker compose down
 
