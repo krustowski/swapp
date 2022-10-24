@@ -7,30 +7,54 @@ import (
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-type about struct {
+type home struct {
 	app.Compo
 }
 
-func (a *about) Render() app.UI {
-	var text string = "whoa doggies"
+type header struct {
+	app.Compo
+}
 
+type table struct {
+	app.Compo
+}
+
+func (h *home) Render() app.UI {
 	return app.Div().Body(
-		app.H2().Text(text),
-		app.A().Href("/").Text(text),
-	).Class("dark")
+		app.Ul().Attr("flex-shrink", 0).Attr("display", "flex"),
+		app.Body().Class("dark"),
+		// topbar
+		&header{},
+		// test table
+		&table{},
+	)
 }
 
-// hello is a component that displays a simple "Hello World!". A component is a
-// customizable, independent, and reusable UI element. It is created by
-// embedding app.Compo into a struct.
-type hello struct {
-	app.Compo
+func (h *header) Render() app.UI {
+	return app.Nav().ID("nav").Class("m l top surface-variant").Body(
+		app.A().Href("/").Text("home").Body(
+			app.I().Body(
+				app.Text("home")),
+			app.Span().Body(
+				app.Text("home")),
+		),
+	)
 }
 
-// The Render method is where the component appearance is defined. Here, a
-// "Hello World!" is displayed as a heading.
-func (h *hello) Render() app.UI {
-	return app.H1().Text("Hello World!")
+func (t *table) Render() app.UI {
+	return app.Main().Class("responsive").Body(
+		app.Div().Class("large-space"),
+		app.P().Text("test text"),
+		app.Table().Class("border center-align").Body(
+			app.THead().Body(
+				app.Tr().Body(
+					app.Th().Text("lmao"),
+					app.Th().Text("wtf"),
+					app.Th().Text("kek"),
+				),
+			),
+		),
+	)
 }
 
 // The main function is the entry point where the app is configured and started.
@@ -41,8 +65,7 @@ func main() {
 	//
 	// This is done by calling the Route() function,  which tells go-app what
 	// component to display for a given path, on both client and server-side.
-	app.Route("/", &hello{})
-	app.Route("/about", &about{})
+	app.Route("/", &home{})
 
 	// Once the routes set up, the next thing to do is to either launch the app
 	// or the server that serves the app.
@@ -64,13 +87,8 @@ func main() {
 	// required resources to make it work into a web browser. Here it is
 	// configured to handle requests with a path that starts with "/".
 	http.Handle("/", &app.Handler{
-		Name:        "Hello",
-		Description: "An Hello World! example",
-	})
-
-	http.Handle("/about", &app.Handler{
-		Name:        "About",
-		Description: "Test page",
+		Name:        "swAPP",
+		Description: "sakalWeb progressive web app",
 		Styles: []string{
 			"https://cdn.jsdelivr.net/npm/beercss@2.3.0/dist/cdn/beer.min.css",
 		},
