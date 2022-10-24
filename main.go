@@ -17,7 +17,7 @@ func (a *about) Render() app.UI {
 	return app.Div().Body(
 		app.H2().Text(text),
 		app.A().Href("/").Text(text),
-	)
+	).Class("dark")
 }
 
 // hello is a component that displays a simple "Hello World!". A component is a
@@ -71,6 +71,13 @@ func main() {
 	http.Handle("/about", &app.Handler{
 		Name:        "About",
 		Description: "Test page",
+		Styles: []string{
+			"https://cdn.jsdelivr.net/npm/beercss@2.3.0/dist/cdn/beer.min.css",
+		},
+		Scripts: []string{
+			"https://cdn.jsdelivr.net/npm/beercss@2.3.0/dist/cdn/beer.min.js",
+			"https://cdn.jsdelivr.net/npm/material-dynamic-colors@0.0.10/dist/cdn/material-dynamic-colors.min.js",
+		},
 	})
 
 	if err := http.ListenAndServe(":8080", nil); err != nil {
