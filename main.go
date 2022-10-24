@@ -18,13 +18,17 @@ type header struct {
 type table struct {
 	app.Compo
 
-	data map[string]obj
+	data *users
 }
 
-type obj struct {
-	Name  string
-	Type  string
-	Other string
+type users struct {
+	users map[string]user `json:"users"`
+}
+
+type user struct {
+	Name     string `json:"name"`
+	FullName string `json:"full_name"`
+	Active   bool   `json:"active"`
 }
 
 func (h *home) Render() app.UI {
@@ -50,13 +54,24 @@ func (h *header) Render() app.UI {
 }
 
 func (t *table) Render() app.UI {
-	t.data = map[string]obj{
-		"aaaaa": obj{
-			Name:  "ooo",
-			Type:  "ppp",
-			Other: "ok",
+	data := &users{
+		users: map[string]user{
+			"krusty": user{
+				Name:     "krusty",
+				FullName: "ks",
+				Active:   true,
+			},
 		},
 	}
+
+	/* use Async()
+	reader, err := fetchRemoteStream("http://swapi.savla.su/users")
+	err = json.NewDecoder(reader).Decode(data)
+	if err != nil {
+		panic(err)
+	}
+	reader.Close()
+	*/
 
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("large-space"),
@@ -70,13 +85,13 @@ func (t *table) Render() app.UI {
 				),
 			),
 			app.TBody().Body(
-				app.Range(t.data).Map(func(k string) app.UI {
+				app.Range(data.users).Map(func(k string) app.UI {
 					//s := fmt.Sprintf("%s: %v", k, t.data[k])
 
 					return app.Tr().Body(
-						app.Td().Text(t.data[k].Name),
-						app.Td().Text(t.data[k].Type),
-						app.Td().Text(t.data[k].Other),
+						app.Td().Text(data.users[k].Name),
+						app.Td().Text(data.users[k].FullName),
+						app.Td().Text(data.users[k].Active),
 					)
 				}),
 			),
