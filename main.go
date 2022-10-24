@@ -116,6 +116,10 @@ func main() {
 	http.Handle("/", &app.Handler{
 		Name:        "swAPP",
 		Description: "sakalWeb progressive web app",
+		Icon: app.Icon{
+			Default:    "/web/logo_284.png",
+			AppleTouch: "/web/apple-touch-icon.png",
+		},
 		Styles: []string{
 			"https://cdn.jsdelivr.net/npm/beercss@2.3.0/dist/cdn/beer.min.css",
 		},
