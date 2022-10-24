@@ -17,6 +17,14 @@ type header struct {
 
 type table struct {
 	app.Compo
+
+	data map[string]obj
+}
+
+type obj struct {
+	Name  string
+	Type  string
+	Other string
 }
 
 func (h *home) Render() app.UI {
@@ -42,6 +50,14 @@ func (h *header) Render() app.UI {
 }
 
 func (t *table) Render() app.UI {
+	t.data = map[string]obj{
+		"aaaaa": obj{
+			Name:  "ooo",
+			Type:  "ppp",
+			Other: "ok",
+		},
+	}
+
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("large-space"),
 		app.P().Text("test text"),
@@ -52,6 +68,17 @@ func (t *table) Render() app.UI {
 					app.Th().Text("wtf"),
 					app.Th().Text("kek"),
 				),
+			),
+			app.TBody().Body(
+				app.Range(t.data).Map(func(k string) app.UI {
+					//s := fmt.Sprintf("%s: %v", k, t.data[k])
+
+					return app.Tr().Body(
+						app.Td().Text(t.data[k].Name),
+						app.Td().Text(t.data[k].Type),
+						app.Td().Text(t.data[k].Other),
+					)
+				}),
 			),
 		),
 	)
