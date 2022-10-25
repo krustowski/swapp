@@ -109,6 +109,10 @@ type welcome struct {
 	app.Compo
 }
 
+type login struct {
+	app.Compo
+}
+
 type faq struct {
 	app.Compo
 }
@@ -255,6 +259,7 @@ func (m *maps) Render() app.UI {
 
 func (w *welcome) Render() app.UI {
 	return app.Main().Class("responsive").Body(
+		app.Title().Text("úvod"),
 
 		app.Div().Class("space"),
 		app.H6().Text("Kapka pro ušáčka"),
@@ -274,6 +279,10 @@ func (w *welcome) Render() app.UI {
 			),
 		),
 	)
+}
+
+func (l *login) Render() app.UI {
+	return app.Div().Body()
 }
 
 type QA struct {
