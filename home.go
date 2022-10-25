@@ -2,6 +2,10 @@ package main
 
 import "github.com/maxence-charriere/go-app/v9/pkg/app"
 
+/*
+ * PAGES
+ */
+
 type homePage struct {
 	app.Compo
 }
@@ -14,9 +18,62 @@ type mapPage struct {
 	app.Compo
 }
 
-type statePage struct {
+type settingsPage struct {
 	app.Compo
 }
+
+type faqPage struct {
+	app.Compo
+}
+
+func (h *homePage) Render() app.UI {
+	return app.Div().Body(
+		//app.Body().Class("dark"),
+		&header{},
+		&welcome{},
+		&footer{},
+	)
+}
+
+func (l *listPage) Render() app.UI {
+	return app.Div().Body(
+		//app.Body().Class("dark"),
+		&header{},
+		&table{},
+		&footer{},
+	)
+}
+
+func (m *mapPage) Render() app.UI {
+	return app.Div().Body(
+		//app.Body().Class("dark"),
+		&header{},
+		&maps{},
+		&footer{},
+	)
+}
+
+func (s *settingsPage) Render() app.UI {
+	return app.Div().Body(
+		//app.Body().Class("dark"),
+		&header{},
+		&table{},
+		&footer{},
+	)
+}
+
+func (f *faqPage) Render() app.UI {
+	return app.Div().Body(
+		//app.Body().Class("dark"),
+		&header{},
+		&faq{},
+		&footer{},
+	)
+}
+
+/*
+ * NESTED
+ */
 
 type header struct {
 	app.Compo
@@ -36,49 +93,17 @@ type maps struct {
 	app.Compo
 }
 
-type state struct {
+type welcome struct {
 	app.Compo
 }
 
-type update struct {
+type faq struct {
 	app.Compo
-	updateAvailable bool
-}
-
-func (h *homePage) Render() app.UI {
-	return app.Div().Body(
-		app.Body().Class("dark"),
-		&header{},
-		&table{},
-		&footer{},
-	)
-}
-
-func (m *mapPage) Render() app.UI {
-	return app.Div().Body(
-		app.Body().Class("dark"),
-		&header{},
-		&maps{},
-		&footer{},
-	)
-}
-
-func (l *listPage) Render() app.UI {
-	return app.Div()
-}
-
-func (s *statePage) Render() app.UI {
-	return app.Div().Body(
-		app.Body().Class("dark"),
-		&header{},
-		&state{},
-		&footer{},
-	)
 }
 
 // top navbar
 func (h *header) Render() app.UI {
-	return app.Nav().ID("nav").Class("top fixed-top").Body(
+	return app.Nav().ID("nav").Class("top fixed-top").Style("background-color", "#ed333b").Body(
 		app.A().Href("/").Text("home").Body(
 			app.I().Body(
 				app.Text("home")),
@@ -102,18 +127,18 @@ func (h *header) Render() app.UI {
 
 // bottom navbar
 func (f *footer) Render() app.UI {
-	return app.Nav().ID("nav").Class("bottom fixed-bottom").Body(
+	return app.Nav().ID("nav").Class("bottom fixed-bottom").Style("background-color", "#f37279").Body(
 		app.A().Href("/settings").Text("settings").Body(
 			app.I().Body(
 				app.Text("settings")),
 			app.Span().Body(
 				app.Text("settings")),
 		),
-		app.A().Href("/about").Text("about").Body(
+		app.A().Href("/faq").Text("about").Body(
 			app.I().Body(
 				app.Text("info")),
 			app.Span().Body(
-				app.Text("info")),
+				app.Text("faq")),
 		),
 	)
 }
@@ -133,15 +158,6 @@ func (t *table) Render() app.UI {
 			},
 		},
 	}
-
-	/* use Async()
-	reader, err := fetchRemoteStream("http://swapi.savla.su/users")
-	err = json.NewDecoder(reader).Decode(data)
-	if err != nil {
-		panic(err)
-	}
-	reader.Close()
-	*/
 
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("large-space"),
@@ -170,13 +186,13 @@ func (t *table) Render() app.UI {
 }
 
 func (m *maps) Render() app.UI {
-	coord := ""
+	//coord := ""
 
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("large-space"),
 		app.P().Text("map of usaceks keks"),
 		app.Div().Class("large-space"),
-		app.IFrame().Class("responsive responsive-iframe").Attr("height", "67%").Attr("frameborder", "0").Attr("scrolling", "no").Attr("marginheight", "0").Attr("marginwidth", "0").
+		app.IFrame().Class("responsive responsive-iframe").Height(350).Attr("frameborder", "0").Attr("scrolling", "no").Attr("marginheight", "0").Attr("marginwidth", "0").
 			Src("https://www.openstreetmap.org/export/embed.html?bbox=8.712158203125002%2C47.724544549099676%2C19.984130859375004%2C51.78823192706476&amp;layer=mapnik").Style("border", "1px solid black"),
 		app.Div().Class("space"),
 		app.Small().Body(
@@ -185,7 +201,7 @@ func (m *maps) Render() app.UI {
 	)
 }
 
-func (s *state) Render() app.UI {
+func (w *welcome) Render() app.UI {
 	return app.Div().Class("fill medium-height middle-align center-align").Body(
 		app.Div().Class("center-align").Body(
 			app.I().Class("extra").Text("person"),
@@ -198,5 +214,34 @@ func (s *state) Render() app.UI {
 				app.Button().Class("large right-round").Text("search"),
 			),
 		),
+	)
+}
+
+type QA struct {
+	Q string
+	A string
+}
+
+func (f *faq) Render() app.UI {
+	data := map[string]QA{
+		"prvni": QA{
+			Q: "používá se ketamin k uspávání?",
+			A: "doufáme, že ano",
+		},
+		"druha": QA{
+			Q: "kontakt??????",
+			A: "ne",
+		},
+	}
+
+	return app.Main().Class("responsive").Body(
+		app.Range(data).Map(func(k string) app.UI {
+			return app.Details().Body(
+				app.Summary().Text(data[k].Q),
+				app.P().Text(data[k].A),
+			)
+		}),
+		app.Div().Class("space"),
+		app.A().Href("tel:+420728535909").Text("+420 728 535 909"),
 	)
 }
