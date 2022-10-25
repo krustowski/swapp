@@ -16,6 +16,8 @@ func main() {
 	// This is done by calling the Route() function,  which tells go-app what
 	// component to display for a given path, on both client and server-side.
 	app.Route("/", &homePage{})
+	app.Route("list", &listPage{})
+	app.Route("/map", &mapPage{})
 	app.Route("/state", &statePage{})
 
 	// Once the routes set up, the next thing to do is to either launch the app
