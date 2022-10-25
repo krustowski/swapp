@@ -7,98 +7,6 @@ import (
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-type home struct {
-	app.Compo
-}
-
-type header struct {
-	app.Compo
-}
-
-type table struct {
-	app.Compo
-
-	data *users
-}
-
-type users struct {
-	users map[string]user `json:"users"`
-}
-
-type user struct {
-	Name     string `json:"name"`
-	FullName string `json:"full_name"`
-	Active   bool   `json:"active"`
-}
-
-func (h *home) Render() app.UI {
-	return app.Div().Body(
-		app.Ul().Attr("flex-shrink", 0).Attr("display", "flex"),
-		app.Body().Class("dark"),
-		// topbar
-		&header{},
-		// test table
-		&table{},
-	)
-}
-
-func (h *header) Render() app.UI {
-	return app.Nav().ID("nav").Class("m l top surface-variant").Body(
-		app.A().Href("/").Text("home").Body(
-			app.I().Body(
-				app.Text("home")),
-			app.Span().Body(
-				app.Text("home")),
-		),
-	)
-}
-
-func (t *table) Render() app.UI {
-	data := &users{
-		users: map[string]user{
-			"krusty": user{
-				Name:     "krusty",
-				FullName: "ks",
-				Active:   true,
-			},
-		},
-	}
-
-	/* use Async()
-	reader, err := fetchRemoteStream("http://swapi.savla.su/users")
-	err = json.NewDecoder(reader).Decode(data)
-	if err != nil {
-		panic(err)
-	}
-	reader.Close()
-	*/
-
-	return app.Main().Class("responsive").Body(
-		app.Div().Class("large-space"),
-		app.P().Text("test text"),
-		app.Table().Class("border center-align").Body(
-			app.THead().Body(
-				app.Tr().Body(
-					app.Th().Text("lmao"),
-					app.Th().Text("wtf"),
-					app.Th().Text("kek"),
-				),
-			),
-			app.TBody().Body(
-				app.Range(data.users).Map(func(k string) app.UI {
-					//s := fmt.Sprintf("%s: %v", k, t.data[k])
-
-					return app.Tr().Body(
-						app.Td().Text(data.users[k].Name),
-						app.Td().Text(data.users[k].FullName),
-						app.Td().Text(data.users[k].Active),
-					)
-				}),
-			),
-		),
-	)
-}
-
 // The main function is the entry point where the app is configured and started.
 // It is executed in 2 different environments: A client (the web browser) and a
 // server.
@@ -107,7 +15,8 @@ func main() {
 	//
 	// This is done by calling the Route() function,  which tells go-app what
 	// component to display for a given path, on both client and server-side.
-	app.Route("/", &home{})
+	app.Route("/", &homePage{})
+	app.Route("/state", &statePage{})
 
 	// Once the routes set up, the next thing to do is to either launch the app
 	// or the server that serves the app.

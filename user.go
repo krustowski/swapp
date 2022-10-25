@@ -7,6 +7,16 @@ import (
 	"strconv"
 )
 
+type users struct {
+	users map[string]user `json:"users"`
+}
+
+type user struct {
+	Name     string `json:"name"`
+	FullName string `json:"full_name"`
+	Active   bool   `json:"active"`
+}
+
 func fetchRemoteStream(url string) (io.ReadCloser, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
