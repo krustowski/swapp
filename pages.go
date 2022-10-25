@@ -146,17 +146,17 @@ func (h *header) Render() app.UI {
 // bottom navbar
 func (f *footer) Render() app.UI {
 	return app.Nav().ID("nav").Class("bottom fixed-bottom").Style("background-color", navbarCol).Body(
-		app.A().Href("/login").Text("přihlášení").Body(
-			app.I().Body(
-				app.Text("login")),
-			app.Span().Body(
-				app.Text("přihlášení")),
-		),
 		app.A().Href("/faq").Text("faq").Body(
 			app.I().Body(
 				app.Text("info")),
 			app.Span().Body(
 				app.Text("faq")),
+		),
+		app.A().Href("/login").Text("přihlášení").Body(
+			app.I().Body(
+				app.Text("login")),
+			app.Span().Body(
+				app.Text("přihlášení")),
 		),
 	)
 }
