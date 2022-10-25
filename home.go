@@ -101,9 +101,11 @@ type faq struct {
 	app.Compo
 }
 
+var navbarCol = "#ed333b"
+
 // top navbar
 func (h *header) Render() app.UI {
-	return app.Nav().ID("nav").Class("top fixed-top").Style("background-color", "#ed333b").Body(
+	return app.Nav().ID("nav").Class("top fixed-top").Style("background-color", navbarCol).Body(
 		app.A().Href("/").Text("home").Body(
 			app.I().Body(
 				app.Text("home")),
@@ -127,14 +129,14 @@ func (h *header) Render() app.UI {
 
 // bottom navbar
 func (f *footer) Render() app.UI {
-	return app.Nav().ID("nav").Class("bottom fixed-bottom").Style("background-color", "#f37279").Body(
+	return app.Nav().ID("nav").Class("bottom fixed-bottom").Style("background-color", navbarCol).Body(
 		app.A().Href("/settings").Text("settings").Body(
 			app.I().Body(
 				app.Text("settings")),
 			app.Span().Body(
 				app.Text("settings")),
 		),
-		app.A().Href("/faq").Text("about").Body(
+		app.A().Href("/faq").Text("faq").Body(
 			app.I().Body(
 				app.Text("info")),
 			app.Span().Body(
@@ -202,16 +204,23 @@ func (m *maps) Render() app.UI {
 }
 
 func (w *welcome) Render() app.UI {
-	return app.Div().Class("fill medium-height middle-align center-align").Body(
-		app.Div().Class("center-align").Body(
-			app.I().Class("extra").Text("person"),
-			app.H5().Text("You are not following anyone"),
-			app.Div().Class("space"),
-			app.Nav().Class("no-space").Body(
-				app.Div().Class("max field border left-round").Body(
-					app.Input(),
+	return app.Div().Class("responsive").Body(
+
+		app.Div().Class("space"),
+		app.H6().Text("Kapka pro ušáčka"),
+		app.Div().Class("space"),
+
+		app.Div().Class("fill medium-height middle-align center-align").Body(
+			app.Div().Class("center-align").Body(
+				app.I().Class("extra").Text("person"),
+				app.H5().Text("You are not following anyone"),
+				app.Div().Class("space"),
+				app.Nav().Class("no-space").Body(
+					app.Div().Class("max field border left-round").Body(
+						app.Input(),
+					),
+					app.Button().Class("large right-round").Text("search"),
 				),
-				app.Button().Class("large right-round").Text("search"),
 			),
 		),
 	)
@@ -224,21 +233,42 @@ type QA struct {
 
 func (f *faq) Render() app.UI {
 	data := map[string]QA{
-		"prvni": QA{
+		"aaa": QA{
 			Q: "používá se ketamin k uspávání?",
 			A: "doufáme, že ano",
 		},
-		"druha": QA{
+		"aab": QA{
 			Q: "kontakt??????",
 			A: "ne",
 		},
 	}
 
 	return app.Main().Class("responsive").Body(
+
+		app.Div().Class("space"),
+		app.H6().Text("Často kladené dotazy"),
+		app.Div().Class("space"),
+
 		app.Range(data).Map(func(k string) app.UI {
-			return app.Details().Body(
-				app.Summary().Text(data[k].Q),
-				app.P().Text(data[k].A),
+			// simple expansion
+			/*
+				return app.Details().Body(
+					app.Summary().Text(data[k].Q),
+					app.P().Text(data[k].A),
+				)
+			*/
+
+			// custom expansion
+			return app.Article().Body(
+				app.Details().Body(
+					app.Summary().Class("none").Body(
+						app.Div().Class("row").Body(
+							app.H6().Text(data[k].Q),
+							app.I().Text("arrow_drop_down"),
+						),
+					),
+					app.P().Text(data[k].A),
+				),
 			)
 		}),
 		app.Div().Class("space"),
