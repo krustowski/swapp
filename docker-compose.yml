@@ -15,8 +15,11 @@ services:
         APP_FLAGS: ${APP_NAME}
         DOCKER_DEV_PORT: ${DOCKER_DEV_PORT} 
         GOLANG_VERSION: ${GOLANG_VERSION}
+        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
         TZ: ${TZ}
     restart: unless-stopped
+    depends_on:
+      - db
     cpus: 0.5
     dns:
       - 10.4.5.130
@@ -31,3 +34,19 @@ services:
       - "traefik.http.services.${APP_NAME}.loadbalancer.server.port=${DOCKER_DEV_PORT}"
       - "traefik.docker.network=${DOCKER_DEV_NETWORK}"
 
+  db:
+    image: mariadb:10.3
+    restart: unless-stopped
+    container_name: swapp_db
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_DATABASE: "swapp_savla_su"
+      MYSQL_USER: "swapp_savla_su"
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    networks:
+      - ${DOCKER_DEV_NETWORK}
+    volumes:
+      - database_volume:/var/lib/mysql
+
+volumes:
+  database_volume:

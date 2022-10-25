@@ -18,7 +18,8 @@ func main() {
 	app.Route("/", &homePage{})
 	app.Route("/list", &listPage{})
 	app.Route("/map", &mapPage{})
-	app.Route("/settings", &settingsPage{})
+	app.Route("/login", &loginPage{})
+	//app.Route("/register", &registerPage{})
 	app.Route("/faq", &faqPage{})
 
 	// Once the routes set up, the next thing to do is to either launch the app
