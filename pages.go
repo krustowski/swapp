@@ -2,9 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
 	"log"
-	"net/http"
 
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
@@ -17,16 +15,15 @@ type homePage struct {
 	app.Compo
 }
 
-type listPage struct {
+type usersPage struct {
 	app.Compo
-	donors map[string]donor
 }
 
 type mapPage struct {
 	app.Compo
 }
 
-type loginPage struct {
+type newsPage struct {
 	app.Compo
 }
 
@@ -44,11 +41,11 @@ func (h *homePage) Render() app.UI {
 	)
 }
 
-func (l *listPage) Render() app.UI {
+func (l *usersPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&table{},
+		&users{},
 		app.Div().Class("large-space"),
 		&footer{},
 	)
@@ -64,11 +61,11 @@ func (m *mapPage) Render() app.UI {
 	)
 }
 
-func (s *loginPage) Render() app.UI {
+func (s *newsPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&login{},
+		&news{},
 		app.Div().Class("large-space"),
 		&footer{},
 	)
@@ -96,11 +93,11 @@ type footer struct {
 	app.Compo
 }
 
-type table struct {
+type users struct {
 	app.Compo
 
 	//donors map[string]donor
-	donors map[string]User
+	users map[string]User
 }
 
 type maps struct {
@@ -111,15 +108,29 @@ type welcome struct {
 	app.Compo
 }
 
-type login struct {
-	app.Compo
-}
-
 type faq struct {
 	app.Compo
 }
 
-var navbarCol = "#ed333b"
+type News struct {
+	News []NewsItem `json:"news"`
+}
+
+type NewsItem struct {
+	Title   string `json:"title"`
+	Perex   string `json:"perex"`
+	Link    string `json:"link"`
+	PubDate string `json:"pub_date"`
+}
+
+type news struct {
+	app.Compo
+
+	news []NewsItem `json:"news"`
+}
+
+//var navbarCol = "#ed333b"
+var navbarCol = "#006600"
 
 // top navbar
 func (h *header) Render() app.UI {
@@ -130,7 +141,7 @@ func (h *header) Render() app.UI {
 			app.Span().Body(
 				app.Text("home")),
 		),
-		app.A().Href("/list").Text("users").Body(
+		app.A().Href("/users").Text("users").Body(
 			app.I().Body(
 				app.Text("group")),
 			app.Span().Body(
@@ -154,83 +165,90 @@ func (f *footer) Render() app.UI {
 			app.Span().Body(
 				app.Text("faq")),
 		),
-		app.A().Href("/login").Text("přihlášení").Body(
+		app.A().Href("/news").Text("news").Body(
 			app.I().Body(
-				app.Text("login")),
+				app.Text("newspaper")),
 			app.Span().Body(
-				app.Text("přihlášení")),
+				app.Text("news")),
 		),
 	)
 }
 
-type donor struct {
-	ID     int
-	Name   string
-	Active bool
-}
-
-func (t *table) OnNav(ctx app.Context) {
-	log.Println("starting db read")
-
+func (n *news) OnNav(ctx app.Context) {
 	ctx.Async(func() {
-		//var donors = make(map[string]donor)
-		//var donor donor
+		var news News
 
-		url := "http://swapi.savla.su/users/"
-
-		// push requests use PUT method
-		req, err := http.NewRequest("GET", url, nil)
-		if err != nil {
-			log.Print(err)
+		url := "http://swapi.savla.su/news/krusty"
+		data := fetchSWISData(url)
+		if data == nil {
+			// no nil pointer dereference!
+			log.Println("swis data fetch error, nil pointer")
+			return
 		}
 
-		req.Header.Set("X-Auth-Token", "676c1618a631cffdsf5554xy545n4oo55q33ppvxcx555sa623a5aeea14e42ecfac7e77da8cfbcf4b69d6a3999828e9b0181ade")
-		req.Header.Set("Content-Type", "application/json")
-
-		client := http.Client{}
-
-		res, err := client.Do(req)
-		defer res.Body.Close()
-		if err != nil {
+		if err := json.Unmarshal(*data, &news); err != nil {
 			log.Print(err)
 		}
-
-		data, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			log.Print(err)
-		}
-
-		//var users map[string]interface{}
-		var users Users
-		if err := json.Unmarshal(data, &users); err != nil {
-			log.Print(err)
-		}
-
-		//log.Println(len(users))
-		log.Println(len(users.Users))
-
-		/*
-			donor.ID = 1
-			donor.Name = "test"
-			donor.Active = true
-
-			donors[string(donor.ID)] = donor
-		*/
 
 		// Storing HTTP response in component field:
 		ctx.Dispatch(func(ctx app.Context) {
-			//log.Println(len(users.users))
-			t.donors = users.Users
-			log.Println(len(t.donors))
-
+			n.news = news.News
 			log.Println("dispatch ends")
 		})
-
-		log.Println("db has been read!")
 	})
 }
 
-func (t *table) Render() app.UI {
+func (n *news) Render() app.UI {
+
+	return app.Main().Class("responsive").Body(
+		app.Div().Class("large-space"),
+		app.Table().Class("border left-align").Body(
+			app.TBody().Body(
+				app.Range(n.news).Slice(func(i int) app.UI {
+
+					return app.Tr().Body(
+						app.A().Href(n.news[i].Link).Style("color", "green").Body(
+							app.B().Text(n.news[i].Title),
+						),
+						app.Br(),
+						app.Small().Text(n.news[i].PubDate),
+						app.Div().Class("space"),
+						app.Text(n.news[i].Perex),
+						app.Div().Class("space"),
+						app.Hr(),
+						app.Div().Class("space"),
+					)
+				}),
+			),
+		),
+	)
+}
+
+func (u *users) OnNav(ctx app.Context) {
+	ctx.Async(func() {
+		var users Users
+
+		url := "http://swapi.savla.su/users/"
+		data := fetchSWISData(url)
+		if data == nil {
+			// no nil pointer dereference!
+			log.Println("swis data fetch error, nil pointer")
+			return
+		}
+
+		if err := json.Unmarshal(*data, &users); err != nil {
+			log.Print(err)
+		}
+
+		// Storing HTTP response in component field:
+		ctx.Dispatch(func(ctx app.Context) {
+			u.users = users.Users
+			log.Println("dispatch ends")
+		})
+	})
+}
+
+func (u *users) Render() app.UI {
 
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("large-space"),
@@ -245,12 +263,12 @@ func (t *table) Render() app.UI {
 			),
 			app.TBody().Body(
 				//app.Range(data.users).Map(func(k string) app.UI {
-				app.Range(t.donors).Map(func(k string) app.UI {
+				app.Range(u.users).Map(func(k string) app.UI {
 
 					return app.Tr().Body(
-						app.Td().Text(t.donors[k].Name),
-						app.Td().Text(t.donors[k].FullName),
-						app.Td().Text(t.donors[k].Active),
+						app.Td().Text(u.users[k].Name),
+						app.Td().Text(u.users[k].FullName),
+						app.Td().Text(u.users[k].Active),
 					)
 				}),
 			),
@@ -276,77 +294,8 @@ func (m *maps) Render() app.UI {
 
 func (w *welcome) Render() app.UI {
 	return app.Main().Class("responsive").Body(
-		app.Title().Text("úvod"),
-
 		app.Div().Class("space"),
-		app.H6().Text("Kapka pro ušáčka"),
-		app.Div().Class("space"),
-
-		app.Div().Class("fill medium-height middle-align center-align").Body(
-			app.Div().Class("center-align").Body(
-				app.I().Class("extra").Text("person"),
-				app.H5().Text("You are not following anyone"),
-				app.Div().Class("space"),
-				app.Nav().Class("no-space").Body(
-					app.Div().Class("max field border left-round").Body(
-						app.Input().Type("file").Capture("camera").Accept("image/*"),
-					),
-					app.Button().Class("large right-round").Text("search"),
-				),
-			),
-		),
-	)
-}
-
-func (l *login) Render() app.UI {
-	return app.Div().Body()
-}
-
-type QA struct {
-	Q string
-	A string
-}
-
-func (f *faq) Render() app.UI {
-	data := map[string]QA{
-		"aaa": QA{
-			Q: "používá se ketamin k uspávání?",
-			A: "doufáme, že ano",
-		},
-		"aab": QA{
-			Q: "kontakt??????",
-			A: "ne",
-		},
-	}
-
-	return app.Main().Class("responsive").Body(
-
-		app.Div().Class("space"),
-		app.H6().Text("Často kladené dotazy"),
-		app.Div().Class("space"),
-
-		app.Range(data).Map(func(k string) app.UI {
-			// simple expansion
-			/*
-				return app.Details().Body(
-					app.Summary().Text(data[k].Q),
-					app.P().Text(data[k].A),
-				)
-			*/
-
-			// custom expansion
-			return app.Article().Body(
-				app.Details().Body(
-					app.Summary().Class("none").Body(
-						app.Div().Class("row").Body(
-							app.H6().Text(data[k].Q),
-							//app.I().Text("arrow_drop_down"),
-						),
-					),
-					app.P().Text(data[k].A),
-				),
-			)
-		}),
+		app.H6().Text("swAPP home"),
 		app.Div().Class("space"),
 	)
 }
