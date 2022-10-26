@@ -239,14 +239,18 @@ func (d *dishTable) Render() app.UI {
 						),
 						app.Td().Body(
 							app.If(d.sockets[k].Muted,
-								app.Button().Class("tertiary").Body(
-									app.I().Text("warning"),
-									app.Span().Text("off"),
+								app.A().Href("/dish?mute="+d.sockets[k].ID).Body(
+									app.Button().Class("tertiary responsive").Body(
+										app.I().Text("warning"),
+										app.Span().Text("off"),
+									),
 								),
 							).Else(
-								app.Button().Class("primary").Body(
-									app.I().Text("check"),
-									app.Span().Text("on"),
+								app.A().Href("/dish?mute="+d.sockets[k].ID).Body(
+									app.Button().Class("primary responsive").Body(
+										app.I().Text("check"),
+										app.Span().Text("on"),
+									),
 								),
 							),
 						),
