@@ -1,11 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"log"
-	"time"
+	"net/http"
+	"net/url"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
@@ -19,6 +18,7 @@ type homePage struct {
 
 type listPage struct {
 	app.Compo
+	donors map[string]donor
 }
 
 type mapPage struct {
@@ -171,38 +171,32 @@ func (t *table) OnNav(ctx app.Context) {
 	log.Println("starting db read")
 
 	ctx.Async(func() {
-		// DSN model
-		//db, err := sql.Open("mysql", "swapp_savla_su:"+os.Getenv("MYSQL_PASSWORD")+"@tcp(swapp_db:3306)/swapp_savla_su")
-		db, err := sql.Open("mysql", "swapp_savla_su:e79c99d79d04e76684de36659af9d4ffa6ee9484b204aaa5edd92c08a1045eff@tcp(swapp_db:3306)/swapp_savla_su")
-		defer db.Close()
-		if err != nil {
-			panic(err)
-		}
-
-		db.SetConnMaxLifetime(time.Minute * 3)
-		db.SetMaxOpenConns(10)
-		db.SetMaxIdleConns(10)
-
-		res, err := db.Query("SELECT * FROM donors")
-		defer res.Close()
-
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		var donors = make(map[string]donor)
+		var donor donor
 
-		for res.Next() {
-			var donor donor
-			err := res.Scan(&donor.ID, &donor.Name, &donor.Active)
+		url := "http://swapp_db:4001/db/query?pretty&timings" + url.QueryEscape("q=SELECT * from foo")
 
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			id := string(donor.ID)
-			donors[id] = donor
+		// push requests use PUT method
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			log.Print(err)
 		}
+		req.Header.Set("Content-Type", "application/json")
+
+		client := http.Client{}
+
+		res, err := client.Do(req)
+		if err != nil {
+			log.Print(err)
+		}
+
+		log.Print(res)
+
+		donor.ID = 1
+		donor.Name = "test"
+		donor.Active = true
+
+		donors[string(donor.ID)] = donor
 
 		// Storing HTTP response in component field:
 		ctx.Dispatch(func(ctx app.Context) {
