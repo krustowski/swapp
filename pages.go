@@ -8,7 +8,7 @@ import (
 )
 
 /*
- * PAGES
+ * PAGE ROOTS
  */
 
 type homePage struct {
@@ -23,11 +23,15 @@ type mapPage struct {
 	app.Compo
 }
 
-type newsPage struct {
+type dishPage struct {
 	app.Compo
 }
 
-type faqPage struct {
+type nodesPage struct {
+	app.Compo
+}
+
+type newsPage struct {
 	app.Compo
 }
 
@@ -45,7 +49,7 @@ func (l *usersPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&users{},
+		&usersTable{},
 		app.Div().Class("large-space"),
 		&footer{},
 	)
@@ -55,7 +59,27 @@ func (m *mapPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&maps{},
+		&mapsRender{},
+		app.Div().Class("large-space"),
+		&footer{},
+	)
+}
+
+func (f *dishPage) Render() app.UI {
+	return app.Div().Body(
+		app.Body().Class("dark"),
+		&header{},
+		&dishTable{},
+		app.Div().Class("large-space"),
+		&footer{},
+	)
+}
+
+func (f *nodesPage) Render() app.UI {
+	return app.Div().Body(
+		app.Body().Class("dark"),
+		&header{},
+		&nodesTable{},
 		app.Div().Class("large-space"),
 		&footer{},
 	)
@@ -65,17 +89,7 @@ func (s *newsPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&news{},
-		app.Div().Class("large-space"),
-		&footer{},
-	)
-}
-
-func (f *faqPage) Render() app.UI {
-	return app.Div().Body(
-		app.Body().Class("dark"),
-		&header{},
-		&faq{},
+		&newsTable{},
 		app.Div().Class("large-space"),
 		&footer{},
 	)
@@ -93,40 +107,32 @@ type footer struct {
 	app.Compo
 }
 
-type users struct {
-	app.Compo
-
-	//donors map[string]donor
-	users map[string]User
-}
-
-type maps struct {
-	app.Compo
-}
-
 type welcome struct {
 	app.Compo
 }
 
-type faq struct {
+type usersTable struct {
+	app.Compo
+	users map[string]User
+}
+
+type mapsRender struct {
 	app.Compo
 }
 
-type News struct {
-	News []NewsItem `json:"news"`
-}
-
-type NewsItem struct {
-	Title   string `json:"title"`
-	Perex   string `json:"perex"`
-	Link    string `json:"link"`
-	PubDate string `json:"pub_date"`
-}
-
-type news struct {
+type dishTable struct {
 	app.Compo
+	sockets map[string]Socket
+}
 
-	news []NewsItem `json:"news"`
+type nodesTable struct {
+	app.Compo
+	nodes []Node
+}
+
+type newsTable struct {
+	app.Compo
+	news []NewsItem
 }
 
 //var navbarCol = "#ed333b"
@@ -159,11 +165,17 @@ func (h *header) Render() app.UI {
 // bottom navbar
 func (f *footer) Render() app.UI {
 	return app.Nav().ID("nav").Class("bottom fixed-bottom").Style("background-color", navbarCol).Body(
-		app.A().Href("/faq").Text("faq").Body(
+		app.A().Href("/dish").Text("dish").Body(
 			app.I().Body(
-				app.Text("info")),
+				app.Text("satellite_alit")),
 			app.Span().Body(
-				app.Text("faq")),
+				app.Text("dish")),
+		),
+		app.A().Href("/nodes").Text("nodes").Body(
+			app.I().Body(
+				app.Text("dns")),
+			app.Span().Body(
+				app.Text("nodes")),
 		),
 		app.A().Href("/news").Text("news").Body(
 			app.I().Body(
@@ -174,7 +186,139 @@ func (f *footer) Render() app.UI {
 	)
 }
 
-func (n *news) OnNav(ctx app.Context) {
+/*
+ * TABLE AND OTHER RENDERS
+ */
+
+func (d *dishTable) OnNav(ctx app.Context) {
+	ctx.Async(func() {
+		var sockets Sockets
+
+		url := "http://swapi.savla.su/dish/sockets"
+		data := fetchSWISData(url)
+		if data == nil {
+			// no nil pointer dereference!
+			log.Println("swis data fetch error, nil pointer")
+			return
+		}
+
+		if err := json.Unmarshal(*data, &sockets); err != nil {
+			log.Print(err)
+		}
+
+		// Storing HTTP response in component field:
+		ctx.Dispatch(func(ctx app.Context) {
+			d.sockets = sockets.Sockets
+			log.Println("dispatch ends")
+		})
+	})
+}
+
+func (d *dishTable) Render() app.UI {
+	return app.Main().Class("responsive").Body(
+		app.Div().Class("space"),
+		app.Table().Class("border left-align").Body(
+			app.THead().Body(
+				app.Tr().Body(
+					app.Th().Text("id,name,tcp,path"),
+					app.Th().Text("muted"),
+				),
+			),
+			app.TBody().Body(
+				app.Range(d.sockets).Map(func(k string) app.UI {
+
+					return app.Tr().Body(
+						app.Td().Body(
+							app.B().Text(d.sockets[k].ID).Style("color", "green"),
+							app.Br(),
+							app.Text(d.sockets[k].Hostname),
+							app.Text(":"),
+							app.Text(d.sockets[k].PortTCP),
+							app.Br(),
+							app.Text(d.sockets[k].PathHTTP),
+						),
+						app.Td().Body(
+							app.If(d.sockets[k].Muted,
+								app.Button().Class("tertiary").Body(
+									app.I().Text("warning"),
+									app.Span().Text("off"),
+								),
+							).Else(
+								app.Button().Class("primary").Body(
+									app.I().Text("check"),
+									app.Span().Text("on"),
+								),
+							),
+						),
+					)
+				}),
+			),
+		),
+	)
+}
+
+func (n *nodesTable) OnNav(ctx app.Context) {
+	ctx.Async(func() {
+		var nodes Nodes
+
+		url := "http://swapi.savla.su/infra/hosts"
+		data := fetchSWISData(url)
+		if data == nil {
+			// no nil pointer dereference!
+			log.Println("swis data fetch error, nil pointer")
+			return
+		}
+
+		if err := json.Unmarshal(*data, &nodes); err != nil {
+			log.Print(err)
+		}
+
+		// Storing HTTP response in component field:
+		ctx.Dispatch(func(ctx app.Context) {
+			n.nodes = nodes.Nodes
+			log.Println("dispatch ends")
+		})
+	})
+}
+
+func (n *nodesTable) Render() app.UI {
+
+	return app.Main().Class("responsive").Body(
+		app.Div().Class("large-space"),
+		app.Table().Class("border left-align").Body(
+			app.THead().Body(
+				app.Tr().Body(
+					app.Th().Text("node name"),
+					app.Th().Text("ip addresses"),
+				),
+			),
+			app.TBody().Body(
+				app.Range(n.nodes).Slice(func(i int) app.UI {
+
+					node := n.nodes[i]
+					return app.Tr().Body(
+						app.Td().Body(
+							app.A().Href("http://docs.savla.su/nodes/"+node.NameShort).
+								Style("color", "green").Body(
+								app.B().Text(node.NameShort),
+							),
+						),
+						app.Td().Body(
+							app.Range(n.nodes[i].IPAddress).Slice(func(j int) app.UI {
+								return app.Div().Body(
+									app.Text(node.IPAddress[j]),
+									app.Br(),
+								)
+							}),
+						),
+					)
+				}),
+			),
+		),
+	)
+}
+
+func (n *newsTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
 		var news News
 
@@ -198,11 +342,12 @@ func (n *news) OnNav(ctx app.Context) {
 	})
 }
 
-func (n *news) Render() app.UI {
+func (n *newsTable) Render() app.UI {
 
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("large-space"),
 		app.Table().Class("border left-align").Body(
+
 			app.TBody().Body(
 				app.Range(n.news).Slice(func(i int) app.UI {
 
@@ -224,7 +369,7 @@ func (n *news) Render() app.UI {
 	)
 }
 
-func (u *users) OnNav(ctx app.Context) {
+func (u *usersTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
 		var users Users
 
@@ -248,7 +393,7 @@ func (u *users) OnNav(ctx app.Context) {
 	})
 }
 
-func (u *users) Render() app.UI {
+func (u *usersTable) Render() app.UI {
 
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("large-space"),
@@ -276,7 +421,7 @@ func (u *users) Render() app.UI {
 	)
 }
 
-func (m *maps) Render() app.UI {
+func (m *mapsRender) Render() app.UI {
 	coord := "8.712158203125002%2C47.724544549099676%2C19.984130859375004%2C51.78823192706476&amp;"
 
 	return app.Main().Class("responsive").Body(
