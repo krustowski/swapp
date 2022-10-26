@@ -1,9 +1,10 @@
 package main
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"net/url"
 
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
@@ -35,7 +36,7 @@ type faqPage struct {
 
 func (h *homePage) Render() app.UI {
 	return app.Div().Body(
-		//app.Body().Class("dark"),
+		app.Body().Class("dark"),
 		&header{},
 		&welcome{},
 		app.Div().Class("large-space"),
@@ -45,7 +46,7 @@ func (h *homePage) Render() app.UI {
 
 func (l *listPage) Render() app.UI {
 	return app.Div().Body(
-		//app.Body().Class("dark"),
+		app.Body().Class("dark"),
 		&header{},
 		&table{},
 		app.Div().Class("large-space"),
@@ -55,7 +56,7 @@ func (l *listPage) Render() app.UI {
 
 func (m *mapPage) Render() app.UI {
 	return app.Div().Body(
-		//app.Body().Class("dark"),
+		app.Body().Class("dark"),
 		&header{},
 		&maps{},
 		app.Div().Class("large-space"),
@@ -65,7 +66,7 @@ func (m *mapPage) Render() app.UI {
 
 func (s *loginPage) Render() app.UI {
 	return app.Div().Body(
-		//app.Body().Class("dark"),
+		app.Body().Class("dark"),
 		&header{},
 		&login{},
 		app.Div().Class("large-space"),
@@ -75,7 +76,7 @@ func (s *loginPage) Render() app.UI {
 
 func (f *faqPage) Render() app.UI {
 	return app.Div().Body(
-		//app.Body().Class("dark"),
+		app.Body().Class("dark"),
 		&header{},
 		&faq{},
 		app.Div().Class("large-space"),
@@ -98,7 +99,8 @@ type footer struct {
 type table struct {
 	app.Compo
 
-	donors map[string]donor
+	//donors map[string]donor
+	donors map[string]User
 }
 
 type maps struct {
@@ -122,23 +124,23 @@ var navbarCol = "#ed333b"
 // top navbar
 func (h *header) Render() app.UI {
 	return app.Nav().ID("nav").Class("top fixed-top").Style("background-color", navbarCol).Body(
-		app.A().Href("/").Text("úvod").Body(
+		app.A().Href("/").Text("home").Body(
 			app.I().Body(
 				app.Text("home")),
 			app.Span().Body(
-				app.Text("úvod")),
+				app.Text("home")),
 		),
-		app.A().Href("/list").Text("dárci").Body(
+		app.A().Href("/list").Text("users").Body(
 			app.I().Body(
-				app.Text("list")),
+				app.Text("group")),
 			app.Span().Body(
-				app.Text("dárci")),
+				app.Text("users")),
 		),
-		app.A().Href("/map").Text("mapa").Body(
+		app.A().Href("/map").Text("map").Body(
 			app.I().Body(
 				app.Text("map")),
 			app.Span().Body(
-				app.Text("mapa")),
+				app.Text("map")),
 		),
 	)
 }
@@ -171,36 +173,57 @@ func (t *table) OnNav(ctx app.Context) {
 	log.Println("starting db read")
 
 	ctx.Async(func() {
-		var donors = make(map[string]donor)
-		var donor donor
+		//var donors = make(map[string]donor)
+		//var donor donor
 
-		url := "http://swapp_db:4001/db/query?pretty&timings" + url.QueryEscape("q=SELECT * from foo")
+		url := "http://swapi.savla.su/users/"
 
 		// push requests use PUT method
 		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
 			log.Print(err)
 		}
+
+		req.Header.Set("X-Auth-Token", "676c1618a631cffdsf5554xy545n4oo55q33ppvxcx555sa623a5aeea14e42ecfac7e77da8cfbcf4b69d6a3999828e9b0181ade")
 		req.Header.Set("Content-Type", "application/json")
 
 		client := http.Client{}
 
 		res, err := client.Do(req)
+		defer res.Body.Close()
 		if err != nil {
 			log.Print(err)
 		}
 
-		log.Print(res)
+		data, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			log.Print(err)
+		}
 
-		donor.ID = 1
-		donor.Name = "test"
-		donor.Active = true
+		//var users map[string]interface{}
+		var users Users
+		if err := json.Unmarshal(data, &users); err != nil {
+			log.Print(err)
+		}
 
-		donors[string(donor.ID)] = donor
+		//log.Println(len(users))
+		log.Println(len(users.Users))
+
+		/*
+			donor.ID = 1
+			donor.Name = "test"
+			donor.Active = true
+
+			donors[string(donor.ID)] = donor
+		*/
 
 		// Storing HTTP response in component field:
 		ctx.Dispatch(func(ctx app.Context) {
-			t.donors = donors
+			//log.Println(len(users.users))
+			t.donors = users.Users
+			log.Println(len(t.donors))
+
+			log.Println("dispatch ends")
 		})
 
 		log.Println("db has been read!")
@@ -225,8 +248,8 @@ func (t *table) Render() app.UI {
 				app.Range(t.donors).Map(func(k string) app.UI {
 
 					return app.Tr().Body(
-						app.Td().Text(t.donors[k].ID),
 						app.Td().Text(t.donors[k].Name),
+						app.Td().Text(t.donors[k].FullName),
 						app.Td().Text(t.donors[k].Active),
 					)
 				}),

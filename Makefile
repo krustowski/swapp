@@ -90,7 +90,7 @@ build:
 
 run:	build
 	@echo -e "\n${YELLOW} Starting project (docker-compose up)... ${RESET}\n"
-	@docker compose up --force-recreate --detach
+	@docker compose up --force-recreate --detach --remove-orphans
 
 logs:
 	@echo -e "\n${YELLOW} Fetching container's logs (CTRL-C to exit)... ${RESET}\n"

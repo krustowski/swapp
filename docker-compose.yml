@@ -17,8 +17,8 @@ services:
         GOLANG_VERSION: ${GOLANG_VERSION}
         TZ: ${TZ}
     restart: unless-stopped
-    depends_on:
-      - db
+    #depends_on:
+    #  - db
     cpus: 0.5
     dns:
       - 10.4.5.130
@@ -33,10 +33,10 @@ services:
       - "traefik.http.services.${APP_NAME}.loadbalancer.server.port=${DOCKER_DEV_PORT}"
       - "traefik.docker.network=${DOCKER_DEV_NETWORK}"
 
-  db:
+  #db:
     #docker run -p4001:4001 rqlite/rqlite
-    image: rqlite/rqlite
-    restart: unless-stopped
-    container_name: swapp_db
-    networks:
-      - ${DOCKER_DEV_NETWORK}
+    #image: rqlite/rqlite
+    #restart: unless-stopped
+    #container_name: swapp_db
+    #networks:
+    #  - ${DOCKER_DEV_NETWORK}

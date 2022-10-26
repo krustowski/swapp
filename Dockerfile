@@ -17,7 +17,7 @@ ENV APP_FLAGS ${APP_FLAGS}
 ENV DOCKER_DEV_PORT ${DOCKER_DEV_PORT}
 ENV TZ ${TZ}
 
-RUN apk --no-cache add tzdata git
+RUN apk add tzdata git
 
 WORKDIR /go/src/${APP_NAME}
 COPY . .
