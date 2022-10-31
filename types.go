@@ -18,6 +18,7 @@ type Nodes struct {
 
 type Node struct {
 	NameShort string   `json:"hostname_short"`
+	NameFQDN  string   `json:"hostname_fqdn"`
 	IPAddress []string `json:"ip_address"`
 }
 
@@ -39,5 +40,6 @@ type NewsItem struct {
 	Title   string `json:"title"`
 	Perex   string `json:"perex"`
 	Link    string `json:"link"`
+	Server  string `json:"server"`
 	PubDate string `json:"pub_date"`
 }

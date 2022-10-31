@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"log"
+	"net/url"
 
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
@@ -167,7 +168,7 @@ func (f *footer) Render() app.UI {
 	return app.Nav().ID("nav").Class("bottom fixed-bottom").Style("background-color", navbarCol).Body(
 		app.A().Href("/dish").Text("dish").Body(
 			app.I().Body(
-				app.Text("satellite_alit")),
+				app.Text("satellite_alt")),
 			app.Span().Body(
 				app.Text("dish")),
 		),
@@ -189,6 +190,13 @@ func (f *footer) Render() app.UI {
 /*
  * TABLE AND OTHER RENDERS
  */
+
+func (d *dishTable) OnMount(u *url.URL) {
+	socket := u.Query().Get("mute")
+	if socket != "" {
+		log.Println(socket)
+	}
+}
 
 func (d *dishTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
@@ -306,6 +314,8 @@ func (n *nodesTable) Render() app.UI {
 								Style("color", "green").Body(
 								app.B().Text(node.NameShort),
 							),
+							app.Br(),
+							app.P().Text(node.NameFQDN),
 						),
 						app.Td().Body(
 							app.Range(n.nodes[i].IPAddress).Slice(func(j int) app.UI {
@@ -361,6 +371,8 @@ func (n *newsTable) Render() app.UI {
 						),
 						app.Br(),
 						app.Small().Text(n.news[i].PubDate),
+						app.Br(),
+						app.Small().Text(n.news[i].Server),
 						app.Div().Class("space"),
 						app.Text(n.news[i].Perex),
 						app.Div().Class("space"),
