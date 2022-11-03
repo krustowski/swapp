@@ -12,6 +12,22 @@ type Socket struct {
 	Muted    bool   `json:"muted"`
 }
 
+type Depots struct {
+	Depot Depot `json:"depot"`
+}
+
+type Depot struct {
+	Owner string      `json:"owner_name"`
+	Items []DepotItem `json:"depot_items"`
+}
+
+type DepotItem struct {
+	ID       int    `json:"id"`
+	Desc     string `json:"desc"`
+	Misc     string `json:"misc"`
+	Location string `json:"depot"`
+}
+
 type Nodes struct {
 	Nodes []Node `json:"hosts"`
 }

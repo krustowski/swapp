@@ -28,6 +28,10 @@ type dishPage struct {
 	app.Compo
 }
 
+type depotPage struct {
+	app.Compo
+}
+
 type nodesPage struct {
 	app.Compo
 }
@@ -71,6 +75,16 @@ func (f *dishPage) Render() app.UI {
 		app.Body().Class("dark"),
 		&header{},
 		&dishTable{},
+		app.Div().Class("large-space"),
+		&footer{},
+	)
+}
+
+func (f *depotPage) Render() app.UI {
+	return app.Div().Body(
+		app.Body().Class("dark"),
+		&header{},
+		&depotTable{},
 		app.Div().Class("large-space"),
 		&footer{},
 	)
@@ -126,6 +140,11 @@ type dishTable struct {
 	sockets map[string]Socket
 }
 
+type depotTable struct {
+	app.Compo
+	items []DepotItem
+}
+
 type nodesTable struct {
 	app.Compo
 	nodes []Node
@@ -172,6 +191,12 @@ func (f *footer) Render() app.UI {
 			app.Span().Body(
 				app.Text("dish")),
 		),
+		app.A().Href("/depots").Text("depots").Body(
+			app.I().Body(
+				app.Text("inventory")),
+			app.Span().Body(
+				app.Text("depots")),
+		),
 		app.A().Href("/nodes").Text("nodes").Body(
 			app.I().Body(
 				app.Text("dns")),
@@ -190,6 +215,59 @@ func (f *footer) Render() app.UI {
 /*
  * TABLE AND OTHER RENDERS
  */
+
+func (d *depotTable) OnNav(ctx app.Context) {
+	ctx.Async(func() {
+		var depots Depots
+
+		url := "http://swapi.savla.su/depots/krusty"
+		data := fetchSWISData(url)
+		if data == nil {
+			// no nil pointer dereference!
+			log.Println("swis data fetch error, nil pointer")
+			return
+		}
+
+		if err := json.Unmarshal(*data, &depots); err != nil {
+			log.Print(err)
+		}
+
+		// Storing HTTP response in component field:
+		ctx.Dispatch(func(ctx app.Context) {
+			d.items = depots.Depot.Items
+			log.Println("dispatch ends")
+		})
+	})
+}
+
+func (d *depotTable) Render() app.UI {
+
+	return app.Main().Class("responsive").Body(
+		app.Div().Class("large-space"),
+		app.Table().Class("border left-align").Body(
+			app.THead().Body(
+				app.Tr().Body(
+					app.Th().Text("item desc, misc"),
+					app.Th().Text("location"),
+				),
+			),
+			app.TBody().Body(
+				app.Range(d.items).Slice(func(i int) app.UI {
+					return app.Tr().Body(
+						app.Td().Body(
+							app.B().Style("color", "green").Text(d.items[i].Desc),
+							app.Br(),
+							app.Text(d.items[i].Misc),
+						),
+						app.Td().Body(
+							app.Text(d.items[i].Location),
+						),
+					)
+				}),
+			),
+		),
+	)
+}
 
 func (d *dishTable) OnMount(u *url.URL) {
 	socket := u.Query().Get("mute")

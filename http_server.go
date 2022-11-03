@@ -15,6 +15,7 @@ func initWASM() {
 	app.Route("/users", &usersPage{})
 	app.Route("/map", &mapPage{})
 	app.Route("/dish", &dishPage{})
+	app.Route("/depots", &depotPage{})
 	app.Route("/nodes", &nodesPage{})
 	app.Route("/news", &newsPage{})
 
