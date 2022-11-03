@@ -2,9 +2,9 @@ name: swapp CI/CD pipeline
 
 on:
   push:
-    branches: [ master ]
+    branches: [ never ]
   pull_request:
-    branches: [ master ]
+    branches: [ never ]
 
 jobs:
   redeployment:
