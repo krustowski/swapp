@@ -12,6 +12,19 @@ type Socket struct {
 	Muted    bool   `json:"muted"`
 }
 
+type Domains struct {
+	Domains []Domain `json:"domains"`
+}
+
+type Domain struct {
+	ID         string `json:"domain_id"`
+	FQDN       string `json:"domain_fqdn"`
+	Owner      string `json:"domain_owner"`
+	Expiration string `json:"expiration_date"`
+	Registrar  string `json:"registrar_name"`
+	CfZone     string `json:"cf_zone_id"`
+}
+
 type Depots struct {
 	Depot Depot `json:"depot"`
 }

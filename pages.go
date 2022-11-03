@@ -28,6 +28,10 @@ type dishPage struct {
 	app.Compo
 }
 
+type domainsPage struct {
+	app.Compo
+}
+
 type depotPage struct {
 	app.Compo
 }
@@ -75,6 +79,16 @@ func (f *dishPage) Render() app.UI {
 		app.Body().Class("dark"),
 		&header{},
 		&dishTable{},
+		app.Div().Class("large-space"),
+		&footer{},
+	)
+}
+
+func (f *domainsPage) Render() app.UI {
+	return app.Div().Body(
+		app.Body().Class("dark"),
+		&header{},
+		&domainsTable{},
 		app.Div().Class("large-space"),
 		&footer{},
 	)
@@ -140,6 +154,11 @@ type dishTable struct {
 	sockets map[string]Socket
 }
 
+type domainsTable struct {
+	app.Compo
+	domains []Domain
+}
+
 type depotTable struct {
 	app.Compo
 	items []DepotItem
@@ -191,6 +210,12 @@ func (f *footer) Render() app.UI {
 			app.Span().Body(
 				app.Text("dish")),
 		),
+		app.A().Href("/domains").Text("domains").Body(
+			app.I().Body(
+				app.Text("checklist")),
+			app.Span().Body(
+				app.Text("domains")),
+		),
 		app.A().Href("/depots").Text("depots").Body(
 			app.I().Body(
 				app.Text("inventory")),
@@ -215,6 +240,61 @@ func (f *footer) Render() app.UI {
 /*
  * TABLE AND OTHER RENDERS
  */
+
+func (d *domainsTable) OnNav(ctx app.Context) {
+	ctx.Async(func() {
+		var domains Domains
+
+		url := "http://swapi.savla.su/infra/domains"
+		data := fetchSWISData(url)
+		if data == nil {
+			// no nil pointer dereference!
+			log.Println("swis data fetch error, nil pointer")
+			return
+		}
+
+		if err := json.Unmarshal(*data, &domains); err != nil {
+			log.Print(err)
+		}
+
+		// Storing HTTP response in component field:
+		ctx.Dispatch(func(ctx app.Context) {
+			d.domains = domains.Domains
+			log.Println("dispatch ends")
+		})
+	})
+}
+
+func (d *domainsTable) Render() app.UI {
+
+	return app.Main().Class("responsive").Body(
+		app.Div().Class("large-space"),
+		app.Table().Class("border left-align").Body(
+			app.THead().Body(
+				app.Tr().Body(
+					app.Th().Text("domain fqdn, owner, registrar"),
+					app.Th().Text("expiration date"),
+				),
+			),
+			app.TBody().Body(
+				app.Range(d.domains).Slice(func(i int) app.UI {
+					return app.Tr().Body(
+						app.Td().Body(
+							app.B().Text(d.domains[i].FQDN).Style("color", "green"),
+							app.Br(),
+							app.Text(d.domains[i].Owner),
+							app.Br(),
+							app.Text(d.domains[i].Registrar),
+						),
+						app.Td().Body(
+							app.Text(d.domains[i].Expiration),
+						),
+					)
+				}),
+			),
+		),
+	)
+}
 
 func (d *depotTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
