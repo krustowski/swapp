@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"log"
-	"net/url"
 
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
@@ -152,6 +151,9 @@ type mapsRender struct {
 type dishTable struct {
 	app.Compo
 	sockets map[string]Socket
+
+	// socket_id to be (un)muted
+	muteName string
 }
 
 type domainsTable struct {
@@ -321,7 +323,6 @@ func (d *depotTable) OnNav(ctx app.Context) {
 }
 
 func (d *depotTable) Render() app.UI {
-
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("large-space"),
 		app.Table().Class("border left-align").Body(
@@ -349,14 +350,19 @@ func (d *depotTable) Render() app.UI {
 	)
 }
 
-func (d *dishTable) OnMount(u *url.URL) {
-	socket := u.Query().Get("mute")
-	if socket != "" {
-		log.Println(socket)
-	}
-}
-
 func (d *dishTable) OnNav(ctx app.Context) {
+	queryMute := app.Window().URL().Query().Get("mute")
+
+	if queryMute != "" {
+		//ctx.Async(func() {
+		url := "http://swapi.savla.su/dish/sockets/" + queryMute + "/mute"
+
+		if ok := putSWISData(url); !ok {
+			return
+		}
+		//})
+	}
+
 	ctx.Async(func() {
 		var sockets Sockets
 
@@ -405,15 +411,15 @@ func (d *dishTable) Render() app.UI {
 						),
 						app.Td().Body(
 							app.If(d.sockets[k].Muted,
-								app.A().Href("/dish?mute="+d.sockets[k].ID).Body(
-									app.Button().Class("tertiary responsive").Body(
+								app.A().Href("?mute="+d.sockets[k].ID).Body(
+									app.Button().Class("tertiary").Body(
 										app.I().Text("warning"),
 										app.Span().Text("off"),
 									),
 								),
 							).Else(
-								app.A().Href("/dish?mute="+d.sockets[k].ID).Body(
-									app.Button().Class("primary responsive").Body(
+								app.A().Href("?mute="+d.sockets[k].ID).Body(
+									app.Button().Class("primary").Body(
 										app.I().Text("check"),
 										app.Span().Text("on"),
 									),
