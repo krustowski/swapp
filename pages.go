@@ -188,17 +188,12 @@ func (h *header) Render() app.UI {
 			app.Span().Body(
 				app.Text("home")),
 		),
+		app.H4().Text("swAPP"),
 		app.A().Href("/users").Text("users").Body(
 			app.I().Body(
 				app.Text("group")),
 			app.Span().Body(
 				app.Text("users")),
-		),
-		app.A().Href("/map").Text("map").Body(
-			app.I().Body(
-				app.Text("map")),
-			app.Span().Body(
-				app.Text("map")),
 		),
 	)
 }
@@ -350,6 +345,11 @@ func (d *depotTable) Render() app.UI {
 	)
 }
 
+func (d *dishTable) onClick(ctx app.Context, e app.Event) {
+	element := ctx.JSSrc().Get("value").String()
+	log.Println(element)
+}
+
 func (d *dishTable) OnNav(ctx app.Context) {
 	queryMute := app.Window().URL().Query().Get("mute")
 
@@ -412,14 +412,14 @@ func (d *dishTable) Render() app.UI {
 						app.Td().Body(
 							app.If(d.sockets[k].Muted,
 								app.A().Href("?mute="+d.sockets[k].ID).Body(
-									app.Button().Class("tertiary").Body(
+									app.Button().OnClick(d.onClick).Value(d.sockets[k].ID).Class("tertiary").Body(
 										app.I().Text("warning"),
 										app.Span().Text("off"),
 									),
 								),
 							).Else(
 								app.A().Href("?mute="+d.sockets[k].ID).Body(
-									app.Button().Class("primary").Body(
+									app.Button().OnClick(d.onClick).Value(d.sockets[k].ID).Class("primary").Body(
 										app.I().Text("check"),
 										app.Span().Text("on"),
 									),
