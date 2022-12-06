@@ -47,9 +47,8 @@ func (h *homePage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&welcome{},
-		app.Div().Class("large-space"),
 		&footer{},
+		&welcome{},
 	)
 }
 
@@ -57,9 +56,8 @@ func (l *usersPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&usersTable{},
-		app.Div().Class("large-space"),
 		&footer{},
+		&usersTable{},
 	)
 }
 
@@ -67,9 +65,8 @@ func (m *mapPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&mapsRender{},
-		app.Div().Class("large-space"),
 		&footer{},
+		&mapsRender{},
 	)
 }
 
@@ -77,9 +74,8 @@ func (f *dishPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&dishTable{},
-		app.Div().Class("large-space"),
 		&footer{},
+		&dishTable{},
 	)
 }
 
@@ -87,9 +83,8 @@ func (f *domainsPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&domainsTable{},
-		app.Div().Class("large-space"),
 		&footer{},
+		&domainsTable{},
 	)
 }
 
@@ -97,9 +92,8 @@ func (f *depotPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&depotTable{},
-		app.Div().Class("large-space"),
 		&footer{},
+		&depotTable{},
 	)
 }
 
@@ -107,9 +101,8 @@ func (f *nodesPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&nodesTable{},
-		app.Div().Class("large-space"),
 		&footer{},
+		&nodesTable{},
 	)
 }
 
@@ -117,9 +110,8 @@ func (s *newsPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
-		&newsTable{},
-		app.Div().Class("large-space"),
 		&footer{},
+		&newsTable{},
 	)
 }
 
