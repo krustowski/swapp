@@ -25,6 +25,8 @@ type mapPage struct {
 
 type dishPage struct {
 	app.Compo
+
+	notificationPermission app.NotificationPermission
 }
 
 type domainsPage struct {
@@ -70,13 +72,17 @@ func (m *mapPage) Render() app.UI {
 	)
 }
 
-func (f *dishPage) Render() app.UI {
+func (d *dishPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
 		&footer{},
 		&dishTable{},
 	)
+}
+
+func (d *dishPage) OnMount(ctx app.Context) {
+	d.notificationPermission = ctx.Notifications().Permission()
 }
 
 func (f *domainsPage) Render() app.UI {
@@ -337,6 +343,14 @@ func (d *depotTable) Render() app.UI {
 	)
 }
 
+func (d *dishTable) testNotification(ctx app.Context, e app.Event) {
+	ctx.Notifications().New(app.Notification{
+		Title: "Test",
+		Body:  "A test notification",
+		Path:  "/mypage",
+	})
+}
+
 func (d *dishTable) onClick(ctx app.Context, e app.Event) {
 	element := ctx.JSSrc().Get("value").String()
 	log.Println(element)
@@ -381,6 +395,10 @@ func (d *dishTable) OnNav(ctx app.Context) {
 func (d *dishTable) Render() app.UI {
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("space"),
+
+		app.Button().Text("Test Notification").
+			OnClick(d.testNotification),
+
 		app.Table().Class("border left-align").Body(
 			app.THead().Body(
 				app.Tr().Body(

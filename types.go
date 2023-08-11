@@ -1,7 +1,7 @@
 package main
 
 type Sockets struct {
-	Sockets map[string]Socket `json:"sockets"`
+	Sockets map[string]Socket `json:"items"`
 }
 
 type Socket struct {
@@ -26,7 +26,7 @@ type Domain struct {
 }
 
 type Depots struct {
-	Depot Depot `json:"depot"`
+	Depot Depot `json:"items"`
 }
 
 type Depot struct {
@@ -52,7 +52,7 @@ type Node struct {
 }
 
 type Users struct {
-	Users map[string]User `json:"users"`
+	Users map[string]User `json:"items"`
 }
 
 type User struct {
@@ -62,7 +62,7 @@ type User struct {
 }
 
 type News struct {
-	News []NewsItem `json:"news"`
+	News []NewsItem `json:"items"`
 }
 
 type NewsItem struct {
