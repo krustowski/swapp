@@ -2,11 +2,11 @@ package pages
 
 import "github.com/maxence-charriere/go-app/v9/pkg/app"
 
-type welcome struct {
+type WelcomePage struct {
 	app.Compo
 }
 
-func (w *welcome) Render() app.UI {
+func (w *WelcomePage) Render() app.UI {
 	return app.Main().Class("responsive").Body(
 		app.Div().Class("space"),
 

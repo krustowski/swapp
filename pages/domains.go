@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"log"
 
+	infra "go.savla.dev/swis/v5/pkg/infra"
+
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-type domainsPage struct {
+type DomainsPage struct {
 	app.Compo
 }
 
-func (f *domainsPage) Render() app.UI {
+func (f *DomainsPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
@@ -22,12 +24,14 @@ func (f *domainsPage) Render() app.UI {
 
 type domainsTable struct {
 	app.Compo
-	domains []Domain
+	domains []infra.Domain
 }
 
 func (d *domainsTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
-		var domains Domains
+		domains := struct {
+			Domains []infra.Domain `json:"domains"`
+		}{}
 
 		url := "http://swapi.savla.su/infra/domains"
 		data := fetchSWISData(url)
@@ -67,10 +71,10 @@ func (d *domainsTable) Render() app.UI {
 							app.Br(),
 							app.Text(d.domains[i].Owner),
 							app.Br(),
-							app.Text(d.domains[i].Registrar),
+							app.Text(d.domains[i].RegistrarName),
 						),
 						app.Td().Body(
-							app.Text(d.domains[i].Expiration),
+							app.Text(d.domains[i].ExpirationDate),
 						),
 					)
 				}),

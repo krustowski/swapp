@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"log"
 
+	infra "go.savla.dev/swis/v5/pkg/infra"
+
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-type nodesPage struct {
+type NodesPage struct {
 	app.Compo
 }
 
-func (f *nodesPage) Render() app.UI {
+func (n *NodesPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
@@ -22,12 +24,12 @@ func (f *nodesPage) Render() app.UI {
 
 type nodesTable struct {
 	app.Compo
-	nodes []Node
+	nodes []infra.Host
 }
 
 func (n *nodesTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
-		var nodes Nodes
+		var nodes infra.Hosts
 
 		url := "http://swapi.savla.su/infra/hosts"
 		data := fetchSWISData(url)
@@ -43,7 +45,7 @@ func (n *nodesTable) OnNav(ctx app.Context) {
 
 		// Storing HTTP response in component field:
 		ctx.Dispatch(func(ctx app.Context) {
-			n.nodes = nodes.Nodes
+			n.nodes = nodes.Hosts
 			log.Println("dispatch ends")
 		})
 	})
@@ -65,12 +67,12 @@ func (n *nodesTable) Render() app.UI {
 					node := n.nodes[i]
 					return app.Tr().Body(
 						app.Td().Body(
-							app.A().Href("http://docs.savla.su/nodes/"+node.NameShort).
+							app.A().Href("http://docs.savla.su/nodes/"+node.HostnameShort).
 								Style("color", "green").Body(
-								app.B().Text(node.NameShort),
+								app.B().Text(node.HostnameShort),
 							),
 							app.Br(),
-							app.P().Text(node.NameFQDN),
+							app.P().Text(node.HostnameFQDN),
 						),
 						app.Td().Body(
 							app.Range(n.nodes[i].IPAddress).Slice(func(j int) app.UI {

@@ -4,16 +4,18 @@ import (
 	"encoding/json"
 	"log"
 
+	dish "go.savla.dev/swis/v5/pkg/dish"
+
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-type dishPage struct {
+type DishPage struct {
 	app.Compo
 
 	notificationPermission app.NotificationPermission
 }
 
-func (d *dishPage) Render() app.UI {
+func (d *DishPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
@@ -22,13 +24,13 @@ func (d *dishPage) Render() app.UI {
 	)
 }
 
-func (d *dishPage) OnMount(ctx app.Context) {
+func (d *DishPage) OnMount(ctx app.Context) {
 	d.notificationPermission = ctx.Notifications().Permission()
 }
 
 type dishTable struct {
 	app.Compo
-	sockets map[string]Socket
+	sockets map[string]dish.Socket
 
 	// socket_id to be (un)muted
 	muteName string
@@ -61,7 +63,7 @@ func (d *dishTable) OnNav(ctx app.Context) {
 	}
 
 	ctx.Async(func() {
-		var sockets Sockets
+		var sockets dish.Sockets
 
 		url := "http://swapi.savla.su/dish/sockets"
 		data := fetchSWISData(url)
@@ -104,9 +106,9 @@ func (d *dishTable) Render() app.UI {
 						app.Td().Body(
 							app.B().Text(d.sockets[k].ID).Style("color", "green"),
 							app.Br(),
-							app.Text(d.sockets[k].Hostname),
+							app.Text(d.sockets[k].Host),
 							app.Text(":"),
-							app.Text(d.sockets[k].PortTCP),
+							app.Text(d.sockets[k].Port),
 							app.Br(),
 							app.Text(d.sockets[k].PathHTTP),
 						),

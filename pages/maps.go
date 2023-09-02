@@ -2,20 +2,11 @@ package pages
 
 import "github.com/maxence-charriere/go-app/v9/pkg/app"
 
-type mapPage struct {
+type MapPage struct {
 	app.Compo
 }
 
-func (m *mapPage) Render() app.UI {
-	return app.Div().Body(
-		app.Body().Class("dark"),
-		&header{},
-		&footer{},
-		&mapsRender{},
-	)
-}
-
-func (m *mapPage) Render() app.UI {
+func (m *MapPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},

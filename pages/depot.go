@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"log"
 
+	dpt "go.savla.dev/swis/v5/pkg/depots"
+
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-type depotPage struct {
+type DepotPage struct {
 	app.Compo
 }
 
-func (d *depotPage) Render() app.UI {
+func (d *DepotPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
@@ -22,12 +24,14 @@ func (d *depotPage) Render() app.UI {
 
 type depotTable struct {
 	app.Compo
-	items []DepotItem
+	items map[string]dpt.DepotItem
 }
 
 func (d *depotTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
-		var depots Depots
+		depots := struct {
+			Depots map[string]dpt.DepotItem `json:"items"`
+		}{}
 
 		url := "http://swapi.savla.su/depots/krusty"
 		data := fetchSWISData(url)
@@ -43,7 +47,7 @@ func (d *depotTable) OnNav(ctx app.Context) {
 
 		// Storing HTTP response in component field:
 		ctx.Dispatch(func(ctx app.Context) {
-			d.items = depots.Depot.Items
+			d.items = depots.Depots
 			log.Println("dispatch ends")
 		})
 	})
@@ -60,15 +64,15 @@ func (d *depotTable) Render() app.UI {
 				),
 			),
 			app.TBody().Body(
-				app.Range(d.items).Slice(func(i int) app.UI {
+				app.Range(d.items).Map(func(key string) app.UI {
 					return app.Tr().Body(
 						app.Td().Body(
-							app.B().Style("color", "green").Text(d.items[i].Desc),
+							app.B().Style("color", "green").Text(d.items[key].Description),
 							app.Br(),
-							app.Text(d.items[i].Misc),
+							app.Text(d.items[key].Misc),
 						),
 						app.Td().Body(
-							app.Text(d.items[i].Location),
+							app.Text(d.items[key].Location),
 						),
 					)
 				}),

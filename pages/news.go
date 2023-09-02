@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"log"
 
+	nws "go.savla.dev/swis/v5/pkg/news"
+
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-type newsPage struct {
+type NewsPage struct {
 	app.Compo
 }
 
-func (s *newsPage) Render() app.UI {
+func (s *NewsPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
@@ -22,12 +24,14 @@ func (s *newsPage) Render() app.UI {
 
 type newsTable struct {
 	app.Compo
-	news []NewsItem
+	news []nws.Item
 }
 
 func (n *newsTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
-		var news News
+		news := struct {
+			News []nws.Item `json:"items"`
+		}{}
 
 		url := "http://swapi.savla.su/news/krusty"
 		data := fetchSWISData(url)

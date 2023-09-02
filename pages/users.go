@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"log"
 
+	usr "go.savla.dev/swis/v5/pkg/users"
+
 	"github.com/maxence-charriere/go-app/v9/pkg/app"
 )
 
-type usersPage struct {
+type UsersPage struct {
 	app.Compo
 }
 
-func (l *usersPage) Render() app.UI {
+func (u *UsersPage) Render() app.UI {
 	return app.Div().Body(
 		app.Body().Class("dark"),
 		&header{},
@@ -22,12 +24,14 @@ func (l *usersPage) Render() app.UI {
 
 type usersTable struct {
 	app.Compo
-	users map[string]User
+	users map[string]usr.User
 }
 
 func (u *usersTable) OnNav(ctx app.Context) {
 	ctx.Async(func() {
-		var users Users
+		users := struct {
+			Users map[string]usr.User `json:"items"`
+		}{}
 
 		url := "http://swapi.savla.su/users/"
 		data := fetchSWISData(url)
